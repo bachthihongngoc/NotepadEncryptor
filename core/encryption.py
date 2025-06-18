@@ -1,23 +1,37 @@
 from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
 import base64
 import hashlib
 
-class FileEncryptor:
-    def __init__(self, key):
-        self.key = self._derive_key(key)
+class AESEncryptor:
+    def __init__(self, key: str):
+        # Tạo khóa AES 256-bit từ key người dùng nhập
+        self.key = hashlib.sha256(key.encode()).digest()
 
-    def _derive_key(self, key):
-        return hashlib.sha256(key.encode()).digest()
+    def pad(self, data: bytes) -> bytes:
+        # Padding để dữ liệu là bội số của 16
+        padding_len = 16 - (len(data) % 16)
+        return data + bytes([padding_len] * padding_len)
 
-    def encrypt_text(self, text):
-        cipher = AES.new(self.key, AES.MODE_EAX)
-        ciphertext, tag = cipher.encrypt_and_digest(text.encode())
-        return cipher.nonce + tag + ciphertext
+    def unpad(self, data: bytes) -> bytes:
+        padding_len = data[-1]
+        return data[:-padding_len]
 
-    def decrypt_text(self, encrypted_data):
-        nonce = encrypted_data[:16]
-        tag = encrypted_data[16:32]
-        ciphertext = encrypted_data[32:]
-        
-        cipher = AES.new(self.key, AES.MODE_EAX, nonce=nonce)
-        return cipher.decrypt_and_verify(ciphertext, tag).decode()
+    def encrypt(self, data: bytes) -> str:
+      iv = get_random_bytes(16)
+      cipher = AES.new(self.key, AES.MODE_CBC, iv)
+      padded_data = self.pad(data)
+      ciphertext = cipher.encrypt(padded_data)
+      encrypted_data = iv + ciphertext
+      return base64.b64encode(encrypted_data).decode("utf-8")  # Trả về chuỗi base64
+
+
+    def decrypt(self, data: bytes) -> bytes:
+        # Giải mã dữ liệu bytes
+        iv = data[:16]
+        ciphertext = data[16:]
+        cipher = AES.new(self.key, AES.MODE_CBC, iv)
+        decrypted = cipher.decrypt(ciphertext)
+        return self.unpad(decrypted)
+    
+    
