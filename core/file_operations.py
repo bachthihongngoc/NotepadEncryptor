@@ -26,7 +26,7 @@ class FileOperations:
           content = file.read()
 
           #kiểm tra content đã đọc
-          print("content đã đọc:", content)
+          #print("content đã đọc:", content)
 
         is_encrypted_file = FileOperations.is_encrypted(file_path)
         '''ext = os.path.splitext(file_path)[1].lower()
@@ -37,7 +37,7 @@ class FileOperations:
           if key:
             try:
               #encrypted_data = base64.b64decode(content)
-              print("content:", content)
+              #print("content:", content)
               decryptor = AESDecryptor(key)
               decrypt_content = decryptor.decrypt_data(content)
             except Exception as e:
@@ -74,7 +74,7 @@ class FileOperations:
               # Mã hóa toàn bộ nội dung trong text_area, chuyển chuỗi thành bytes
               encryptor = AESEncryptor(key)
               encrypted_content = encryptor.encrypt(plaintext.encode("utf-8"))  # Chuyển văn bản thành bytes
-              print("encrypted_content:", encrypted_content)
+              #print("encrypted_content:", encrypted_content)
 
               
   
